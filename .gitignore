@@ -1,0 +1,17 @@
+# Ignore OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+*.log
+
+# Ignore local env or secrets
+.env
+.env.local
+
+# Ignore Lambda build artifacts
+lambda-deploy.zip
+__pycache__/
+*.pyc
+
+# Ignore node_modules (if any added later)
+node_modules/
