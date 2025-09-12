@@ -1,0 +1,16 @@
+# Step 1: Request a pre-signed upload URL
+curl -X POST \
+  -H "Content-Type: application/json" \
+  -d '{"fileName": "example.png", "contentType": "image/png"}' \
+  https://YOUR_API_GATEWAY_URL
+
+# Example Response:
+# {"url": "https://<BUCKET>.s3.<REGION>.amazonaws.com/uploads/...?AWSAccessKeyId=...&Signature=...", "key": "uploads/1710000000-abc123.png"}
+
+# Step 2: Upload file using the signed URL
+curl -X PUT \
+  -H "Content-Type: image/png" \
+  --upload-file ./example.png \
+  "https://<BUCKET>.s3.<REGION>.amazonaws.com/uploads/1710000000-abc123.png?AWSAccessKeyId=...&Signature=..."
+
+# On success: HTTP 200 — file is uploaded to S3

@@ -1,140 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Secure Image Upload</title>
 
-    <!-- Tailwind CSS via CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Secure Image Upload</title>
 
-    <!-- Extended Tailwind with custom color palette -->
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              background: "#F9FAFB",
-              primary: "#3B82F6",
-              "primary-hover": "#2563EB",
-              success: "#10B981",
-              error: "#EF4444",
-              card: "#FFFFFF",
-              accent: "#6B7280",
-            },
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Extended Tailwind with custom color palette -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            background: "#F9FAFB",
+            primary: "#3B82F6",
+            "primary-hover": "#2563EB",
+            success: "#10B981",
+            error: "#EF4444",
+            card: "#FFFFFF",
+            accent: "#6B7280",
           },
         },
-      };
-    </script>
+      },
+    };
+  </script>
 
-    <style>
-      /* Modern gradient text for title */
-      .gradient-title {
-        background: linear-gradient(90deg, #3b82f6, #10b981, #ef4444);
-        -webkit-background-clip: text;
-        background-clip: text;
-        color: transparent;
-        font-weight: 800;
-      }
-    </style>
-  </head>
-  <body
-    class="bg-background min-h-screen flex flex-col items-center justify-center p-4"
-  >
-    <div class="w-full max-w-md">
-      <!-- Title with modern gradient -->
-      <h1 class="gradient-title text-2xl md:text-3xl text-center mb-2">
-        Secure Image Upload (S3 signed URL)
-      </h1>
-      <h2 class="text-accent text-center text-lg mb-6">
-        — Day 14 #180DaysOfCloud
-      </h2>
+  <style>
+    /* Modern gradient text for title */
+    .gradient-title {
+      background: linear-gradient(90deg, #3b82f6, #10b981, #ef4444);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      font-weight: 800;
+    }
+  </style>
+</head>
 
-      <!-- Upload Card -->
-      <div
-        id="uploadCard"
-        class="bg-card rounded-xl shadow-md p-6 border border-gray-200"
-      >
-        <!-- File Input & Drag Area -->
-        <div
-          id="dropArea"
-          class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-primary transition mb-4"
-        >
-          <p class="text-accent mb-2">
-            Drag & drop image here or click to select
-          </p>
-          <input
-            type="file"
-            id="fileInput"
-            accept="image/jpeg,image/png,image/gif,image/webp"
-            class="hidden"
-            aria-label="Choose image file (max 5MB, JPEG/PNG/GIF/WEBP)"
-          />
-          <button
-            type="button"
-            onclick="document.getElementById('fileInput').click()"
-            class="text-primary hover:text-primary-hover font-medium"
-          >
-            Choose File
-          </button>
-        </div>
+<body class="bg-background min-h-screen flex flex-col items-center justify-center p-4">
+  <div class="w-full max-w-md">
+    <!-- Title with modern gradient -->
+    <h1 class="gradient-title text-2xl md:text-3xl text-center mb-2">
+      Secure Image Upload (S3 signed URL)
+    </h1>
+    <h2 class="text-accent text-center text-lg mb-6">
+      <b>jerrytarus </b>#180DaysOfCloud
+    </h2>
 
-        <!-- Preview Thumbnail -->
-        <div id="previewContainer" class="hidden mb-4">
-          <img
-            id="previewImage"
-            src=""
-            alt="Preview"
-            class="max-w-full h-auto rounded-lg shadow-sm"
-          />
-        </div>
-
-        <!-- Status Messages -->
-        <div id="statusMessage" class="mb-4 min-h-6 text-sm font-medium"></div>
-
-        <!-- Progress Bar -->
-        <div id="progressContainer" class="hidden mb-4">
-          <div class="w-full bg-gray-200 rounded-full h-2.5">
-            <div
-              id="progressBar"
-              class="bg-primary h-2.5 rounded-full"
-              style="width: 0%"
-            ></div>
-          </div>
-          <p id="progressText" class="text-xs text-accent mt-1">0%</p>
-        </div>
-
-        <!-- Upload Button -->
-        <button
-          id="uploadButton"
-          disabled
-          onclick="uploadFile()"
-          class="w-full py-2 px-4 bg-primary text-white rounded-lg hover:bg-primary-hover transition font-medium"
-        >
-          Get upload URL & Upload
+    <!-- Upload Card -->
+    <div id="uploadCard" class="bg-card rounded-xl shadow-md p-6 border border-gray-200">
+      <!-- File Input & Drag Area -->
+      <div id="dropArea"
+        class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-primary transition mb-4">
+        <p class="text-accent mb-2">
+          Drag & drop image here or click to select
+        </p>
+        <input type="file" id="fileInput" accept="image/jpeg,image/png,image/gif,image/webp" class="hidden"
+          aria-label="Choose image file (max 5MB, JPEG/PNG/GIF/WEBP)" />
+        <button type="button" onclick="document.getElementById('fileInput').click()"
+          class="text-primary hover:text-primary-hover font-medium">
+          Choose File
         </button>
+      </div>
 
-        <!-- Success Link -->
-        <div
-          id="successLinkContainer"
-          class="hidden mt-4 p-3 bg-green-50 rounded-lg"
-        >
-          <p class="text-success text-sm font-medium mb-1">
-            Upload successful!
-          </p>
-          <a
-            id="objectLink"
-            href="#"
-            target="_blank"
-            class="text-primary hover:underline text-sm break-all"
-          >
-            View uploaded image
-          </a>
+      <!-- Preview Thumbnail -->
+      <div id="previewContainer" class="hidden mb-4">
+        <img id="previewImage" src="" alt="Preview" class="max-w-full h-auto rounded-lg shadow-sm" />
+      </div>
+
+      <!-- Status Messages -->
+      <div id="statusMessage" class="mb-4 min-h-6 text-sm font-medium"></div>
+
+      <!-- Progress Bar -->
+      <div id="progressContainer" class="hidden mb-4">
+        <div class="w-full bg-gray-200 rounded-full h-2.5">
+          <div id="progressBar" class="bg-primary h-2.5 rounded-full" style="width: 0%"></div>
         </div>
+        <p id="progressText" class="text-xs text-accent mt-1">0%</p>
+      </div>
+
+      <!-- Upload Button -->
+      <button id="uploadButton" disabled onclick="uploadFile()"
+        class="w-full py-2 px-4 bg-primary text-white rounded-lg hover:bg-primary-hover transition font-medium">
+        Get upload URL & Upload
+      </button>
+
+      <!-- Success Link -->
+      <div id="successLinkContainer" class="hidden mt-4 p-3 bg-green-50 rounded-lg">
+        <p class="text-success text-sm font-medium mb-1">
+          Upload successful!
+        </p>
+        <a id="objectLink" href="#" target="_blank" class="text-primary hover:underline text-sm break-all">
+          View uploaded image
+        </a>
       </div>
     </div>
+  </div>
 
-    <!-- Attach JavaScript -->
-    <script src="app.js"></script>
-  </body>
+  <script src="app.js"></script>
+</body>
+
 </html>
