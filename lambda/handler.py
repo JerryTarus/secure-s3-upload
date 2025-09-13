@@ -37,7 +37,7 @@ def lambda_handler(event, context):
                 })
             }
 
-        # Validate allowed image types (optional but recommended)
+        # Validate allowed image types
         allowed_types = {'image/jpeg', 'image/png', 'image/gif', 'image/webp'}
         if content_type not in allowed_types:
             return {
@@ -77,9 +77,9 @@ def lambda_handler(event, context):
                 'Access-Control-Allow-Headers': 'Content-Type'
             },
             'body': json.dumps({
-                'url': presigned_url,
+                'url': presigned_url.strip(),
                 'key': object_key
-            })
+            }, separators=(',', ':'))
         }
 
     except Exception as e:

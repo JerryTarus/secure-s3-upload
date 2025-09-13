@@ -138,15 +138,59 @@ async function uploadFile() {
     // DEBUG: Log response status
     console.log(">>> Response status:", response.status);
 
+    // DEBUG: Log response headers
+    console.log(
+      ">>> Response headers:",
+      Object.fromEntries(response.headers.entries())
+    );
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.error || "Failed to get upload URL");
     }
 
-    const { url, key } = await response.json();
+    // DEBUG: Get response as text first to see raw content
+    const responseText = await response.text();
+    console.log(">>> Raw response text:", responseText);
+
+    // Try to parse as JSON
+    let responseData;
+    try {
+      responseData = JSON.parse(responseText);
+      console.log(">>> Parsed response data:", responseData);
+    } catch (parseError) {
+      console.error(">>> JSON Parse Error:", parseError);
+      throw new Error("Server returned invalid JSON: " + responseText);
+    }
+
+    // Check for different possible response structures
+    let url, key;
+
+    if (responseData.url && responseData.key) {
+      // Standard format
+      url = responseData.url;
+      key = responseData.key;
+    } else if (responseData.uploadUrl && responseData.key) {
+      // Alternative format
+      url = responseData.uploadUrl;
+      key = responseData.key;
+    } else if (responseData.presignedUrl && responseData.objectKey) {
+      // Another alternative format
+      url = responseData.presignedUrl;
+      key = responseData.objectKey;
+    } else {
+      // Log all available properties
+      console.error(
+        ">>> Available response properties:",
+        Object.keys(responseData)
+      );
+      throw new Error(
+        "Invalid response from server - missing url/key properties"
+      );
+    }
 
     if (!url || !key) {
-      throw new Error("Invalid response from server");
+      throw new Error("Invalid response from server - empty url or key");
     }
 
     // DEBUG: Log received data
@@ -177,6 +221,7 @@ async function uploadFile() {
         showStatus("Upload complete!", "text-success");
       } else {
         showError(`Upload failed: HTTP ${xhr.status}`);
+        console.log(">>> S3 Upload Response:", xhr.responseText);
       }
       uploadButton.disabled = false;
     });
@@ -185,6 +230,9 @@ async function uploadFile() {
       showError("Upload failed due to network error.");
       uploadButton.disabled = false;
     });
+    // Trim any leading/trailing spaces from URL
+    url = url.trim();
+    console.log(">>> CLEANED URL:", url);
 
     xhr.open("PUT", url);
     xhr.setRequestHeader("Content-Type", selectedFile.type);
